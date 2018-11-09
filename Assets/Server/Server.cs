@@ -10,6 +10,11 @@ namespace Server
     {
         private const string ServerUrl = "";
 
+        public struct UserList
+        {
+            public List<User> Users;
+        }
+
         private static string GetResponse(string func, Dictionary<string, string> requestParams)
         {
             var additionalUri = func + "/";
@@ -64,7 +69,7 @@ namespace Server
         public IEnumerable<User> GetUsers()
         {
             var data = GetResponse("user/all", null);
-            return JsonUtility.FromJson<List<User>>(data);
+            return JsonUtility.FromJson<UserList>(data).Users;
         }
 
         public IEnumerator UpdateLocation(User user)

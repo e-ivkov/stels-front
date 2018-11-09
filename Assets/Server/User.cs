@@ -18,6 +18,16 @@ namespace Server
         
         private bool _cacheEnabled = true;
 
+        public User(int id, string name, Vector2 location, int score, bool alive, string photoUrl)
+        {
+            Id = id;
+            Name = name;
+            Location = location;
+            Score = score;
+            Alive = alive;
+            PhotoUrl = photoUrl;
+        }
+
         public Texture2D Photo
         {
             get
