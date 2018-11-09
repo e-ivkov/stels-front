@@ -44,16 +44,20 @@ public class SpawnOnMap : MonoBehaviour {
         enemies = new List<GameObject>();
     }
 
+    public GameObject enemyPrefab;
+
     //Spawns enemies with the given coordinates 
     public void SpawnEnemies(List<Vector2d> locations)
     {
         if (_isLocationProviderInitialized)
         {
             RemoveEnemies();
-            transform.localPosition = map.GeoToWorldPosition(LocationProvider.CurrentLocation.LatitudeLongitude);
             locations.ForEach(delegate (Vector2d location)
             {
-                //TODO Create an enemy from prefab and change its transform according to the location.
+                var enemyPosition = map.GeoToWorldPosition(LocationProvider.CurrentLocation.LatitudeLongitude);
+                var enemy = Instantiate(enemyPrefab);
+                enemy.transform.localPosition = enemyPosition;
+                enemies.Add(enemy);
             });
         }
     }
