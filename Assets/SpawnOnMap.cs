@@ -24,12 +24,14 @@ public class SpawnOnMap : MonoBehaviour {
             return _locationProvider;
         }
     }
+    AbstractMap map;
 
 
     // Use this for initialization
     void Start () {
         enemies = new List<GameObject>();
         LocationProviderFactory.Instance.mapManager.OnInitialized += () => _isLocationProviderInitialized = true;
+        map = LocationProviderFactory.Instance.mapManager;
     }
 
     //Removes enemies from the map
@@ -39,16 +41,21 @@ public class SpawnOnMap : MonoBehaviour {
         {
             Destroy(enemy.gameObject);
         });
+        enemies = new List<GameObject>();
     }
 
     //Spawns enemies with the given coordinates 
     public void SpawnEnemies(List<Vector2d> locations)
     {
-        RemoveEnemies();
-        locations.ForEach(delegate (Vector2d location)
+        if (_isLocationProviderInitialized)
         {
-             //TODO
-        });
+            RemoveEnemies();
+            transform.localPosition = map.GeoToWorldPosition(LocationProvider.CurrentLocation.LatitudeLongitude);
+            locations.ForEach(delegate (Vector2d location)
+            {
+                //TODO Create an enemy from prefab and change its transform according to the location.
+            });
+        }
     }
 	
 	// Update is called once per frame
