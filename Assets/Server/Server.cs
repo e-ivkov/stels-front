@@ -17,7 +17,7 @@ namespace Server
             {
                 foreach (var key in requestParams.Keys)
                 {
-                    additionalUri += key + "=" + requestParams[key] + "&" ;
+                    additionalUri += WWW.EscapeURL(key) + "=" + WWW.EscapeURL(requestParams[key]) + "&";
                 }
 
                 additionalUri.Remove(additionalUri.Length - 1);
