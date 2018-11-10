@@ -8,24 +8,24 @@ namespace Server
     {
         public int Id;
         public string Name;
-        public Vector2 Location;
+        public Location Location;
         public int Score;
         public bool Alive;
         
         [SerializeField]
-        private string PhotoUrl;
+        private string Photo_url;
         private Texture2D _photo = null;
         
         private bool _cacheEnabled = true;
 
-        public User(int id, string name, Vector2 location, int score, bool alive, string photoUrl)
+        public User(int id, string name, Location location, int score, bool alive, string photoUrl)
         {
             Id = id;
             Name = name;
             Location = location;
             Score = score;
             Alive = alive;
-            PhotoUrl = photoUrl;
+            Photo_url = photoUrl;
         }
 
         public Texture2D Photo
@@ -34,7 +34,7 @@ namespace Server
             {
                 if(_cacheEnabled && _photo != null)
                     return _photo;
-                using (WWW www = new WWW(PhotoUrl))
+                using (WWW www = new WWW(Photo_url))
                 {
                     // Wait for download to complete
                     while(!www.isDone){}
