@@ -9,7 +9,7 @@ public class GameManager : MonoBehaviour
 
 	// Use this for initialization
 	void Start () {
-		
+		Server = new Server.Server("test@innopolis.ru", "123qweasd"); //TODO: remove when login screen is ready
 	}
 	
 	// Update is called once per frame
