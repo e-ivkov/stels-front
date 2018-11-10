@@ -81,7 +81,7 @@ namespace Server
         }
 
         private static string PostRequest(string func, Dictionary<string, string> requestParams,
-            Dictionary<string, string> headers)
+            Dictionary<string, string> headers, bool ignoreErrors=false)
         {
             var additionalUri = func;
             var form = new WWWForm();
@@ -105,7 +105,7 @@ namespace Server
 
                 www.SendWebRequest();
                 while (!www.isDone){}
-                if (!www.isNetworkError && !www.isHttpError) return www.downloadHandler.text;
+                if ((!www.isNetworkError && !www.isHttpError) || ignoreErrors) return www.downloadHandler.text;
                 Debug.Log(www.error);
                 throw new Exception(www.error);
             }
@@ -129,14 +129,14 @@ namespace Server
                 new Dictionary<string, string>() {{"Authorization", "Token " + _token}});
         }
 
-        public bool TryNeutralize(User self, User target)
+        public string TryNeutralize(User target)
         {
             var requestParams = new Dictionary<string, string>()
             {
-                {"TargetId", target.Id.ToString()}
+                {"id", target.Id.ToString()}
             };
-            return bool.Parse(GetResponse("/game/kill/", requestParams,
-                new Dictionary<string, string>() {{"Authorization", "Token " + _token}}));
+            return PostRequest("/game/kill/", requestParams,
+                new Dictionary<string, string>() {{"Authorization", "Token " + _token}}, ignoreErrors:true);
         }
     }
 }

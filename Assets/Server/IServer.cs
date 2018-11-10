@@ -10,6 +10,6 @@ namespace Server
 	{
 		IEnumerable<User> GetUsers();
 		void UpdateLocation(User user);
-		bool TryNeutralize(User self, User target);
+		string TryNeutralize(User target);
 	}
 }
