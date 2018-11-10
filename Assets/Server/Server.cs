@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.AccessControl;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -10,12 +11,25 @@ namespace Server
     {
         private const string ServerUrl = "";
 
+        private string _token;
+
         public struct UserList
         {
             public List<User> Users;
         }
 
-        private static string GetResponse(string func, Dictionary<string, string> requestParams)
+        public Server(string username, string password)
+        {
+            var headers = new Dictionary<string, string>()
+            {
+                {"username", username},
+                {"password", password}
+            };
+            _token = GetResponse("auth", null, headers);
+        }
+
+        private static string GetResponse(string func, Dictionary<string, string> requestParams,
+            Dictionary<string, string> headers)
         {
             var additionalUri = func + "/";
             if (requestParams != null)
@@ -27,25 +41,37 @@ namespace Server
 
                 additionalUri.Remove(additionalUri.Length - 1);
             }
-            using (var www = UnityWebRequest.Get(ServerUrl+additionalUri))
+
+            using (var www = UnityWebRequest.Get(ServerUrl + additionalUri))
             {
+                if (headers != null)
+                {
+                    foreach (var key in headers.Keys)
+                    {
+                        www.SetRequestHeader(key, headers[key]);
+                    }
+                }
+
                 www.SendWebRequest();
-                while(!www.isDone){}
+                while (!www.isDone)
+                {
+                }
 
                 if (www.isNetworkError || www.isHttpError)
                 {
                     Debug.Log(www.error);
                     throw new Exception(www.error);
                 }
-                
+
 
                 // Show results as text
                 Debug.Log(www.downloadHandler.text);
                 return www.downloadHandler.text;
             }
         }
-        
-        private static IEnumerator PostRequest(string func, Dictionary<string, string> requestParams)
+
+        private static IEnumerator PostRequest(string func, Dictionary<string, string> requestParams,
+            Dictionary<string, string> headers)
         {
             var additionalUri = func + "/";
             var form = new WWWForm();
@@ -56,8 +82,17 @@ namespace Server
                     form.AddField(key, requestParams[key]);
                 }
             }
-            using (var www = UnityWebRequest.Post(ServerUrl+additionalUri, form ))
+
+            using (var www = UnityWebRequest.Post(ServerUrl + additionalUri, form))
             {
+                if (headers != null)
+                {
+                    foreach (var key in headers.Keys)
+                    {
+                        www.SetRequestHeader(key, headers[key]);
+                    }
+                }
+
                 yield return www.SendWebRequest();
 
                 if (!www.isNetworkError && !www.isHttpError) yield break;
@@ -65,10 +100,11 @@ namespace Server
                 throw new Exception(www.error);
             }
         }
-        
+
         public IEnumerable<User> GetUsers()
         {
-            var data = GetResponse("user/all", null);
+            var data = GetResponse("user/all/", null,
+                new Dictionary<string, string>() {{"Authorization", "Token " + _token}});
             return JsonUtility.FromJson<UserList>(data).Users;
         }
 
@@ -76,20 +112,20 @@ namespace Server
         {
             var requestParams = new Dictionary<string, string>()
             {
-                {"UserId", user.Id.ToString()},
                 {"Location", JsonUtility.ToJson(user.Location)}
             };
-            yield return PostRequest("user/location", requestParams);
+            yield return PostRequest("user/location/", requestParams,
+                new Dictionary<string, string>() {{"Authorization", "Token " + _token}});
         }
 
         public bool TryNeutralize(User self, User target)
         {
             var requestParams = new Dictionary<string, string>()
             {
-                {"UserId", self.Id.ToString()},
                 {"TargetId", target.Id.ToString()}
             };
-            return bool.Parse(GetResponse("user/neutralize", requestParams));
+            return bool.Parse(GetResponse("user/neutralize/", requestParams,
+                new Dictionary<string, string>() {{"Authorization", "Token " + _token}}));
         }
     }
 }
