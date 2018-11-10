@@ -9,9 +9,19 @@ namespace Server
 {
     public class Server: IServer
     {
-        private const string ServerUrl = "";
+        private const string ServerUrl = "http://142.93.172.157:88";
 
         private string _token;
+
+        public string Token
+        {
+            get { return _token; }
+        }
+
+        public struct Login
+        {
+            public string token;
+        }
 
         public struct UserList
         {
@@ -20,18 +30,18 @@ namespace Server
 
         public Server(string username, string password)
         {
-            var headers = new Dictionary<string, string>()
+            var body = new Dictionary<string, string>()
             {
                 {"username", username},
                 {"password", password}
             };
-            _token = GetResponse("auth", null, headers);
+            _token = JsonUtility.FromJson<Login>(PostRequest("/login/",body,null)).token;
         }
 
         private static string GetResponse(string func, Dictionary<string, string> requestParams,
             Dictionary<string, string> headers)
         {
-            var additionalUri = func + "/";
+            var additionalUri = func;
             if (requestParams != null)
             {
                 foreach (var key in requestParams.Keys)
@@ -70,10 +80,10 @@ namespace Server
             }
         }
 
-        private static IEnumerator PostRequest(string func, Dictionary<string, string> requestParams,
+        private static string PostRequest(string func, Dictionary<string, string> requestParams,
             Dictionary<string, string> headers)
         {
-            var additionalUri = func + "/";
+            var additionalUri = func;
             var form = new WWWForm();
             if (requestParams != null)
             {
@@ -93,9 +103,9 @@ namespace Server
                     }
                 }
 
-                yield return www.SendWebRequest();
-
-                if (!www.isNetworkError && !www.isHttpError) yield break;
+                www.SendWebRequest();
+                while (!www.isDone){}
+                if (!www.isNetworkError && !www.isHttpError) return www.downloadHandler.text;
                 Debug.Log(www.error);
                 throw new Exception(www.error);
             }
@@ -103,18 +113,19 @@ namespace Server
 
         public IEnumerable<User> GetUsers()
         {
-            var data = GetResponse("user/all/", null,
+            var data = GetResponse("/game/players/", null,
                 new Dictionary<string, string>() {{"Authorization", "Token " + _token}});
             return JsonUtility.FromJson<UserList>(data).Users;
         }
 
-        public IEnumerator UpdateLocation(User user)
+        public void UpdateLocation(User user)
         {
             var requestParams = new Dictionary<string, string>()
             {
-                {"Location", JsonUtility.ToJson(user.Location)}
+                {"latitude", user.Location.latitude.ToString()},
+                {"longitude", user.Location.longitude.ToString()},
             };
-            yield return PostRequest("user/location/", requestParams,
+            PostRequest("/game/geolocation/my/", requestParams,
                 new Dictionary<string, string>() {{"Authorization", "Token " + _token}});
         }
 
@@ -124,7 +135,7 @@ namespace Server
             {
                 {"TargetId", target.Id.ToString()}
             };
-            return bool.Parse(GetResponse("user/neutralize/", requestParams,
+            return bool.Parse(GetResponse("/game/kill/", requestParams,
                 new Dictionary<string, string>() {{"Authorization", "Token " + _token}}));
         }
     }
