@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Security.AccessControl;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -8,11 +9,39 @@ namespace Server
 {
     public class Server: IServer
     {
-        private const string ServerUrl = "";
+        private const string ServerUrl = "http://142.93.172.157:88";
 
-        private static string GetResponse(string func, Dictionary<string, string> requestParams)
+        private string _token;
+
+        public string Token
         {
-            var additionalUri = func + "/";
+            get { return _token; }
+        }
+
+        public struct Login
+        {
+            public string token;
+        }
+
+        public struct UserList
+        {
+            public List<User> Users;
+        }
+
+        public Server(string username, string password)
+        {
+            var body = new Dictionary<string, string>()
+            {
+                {"username", username},
+                {"password", password}
+            };
+            _token = JsonUtility.FromJson<Login>(PostRequest("/login/",body,null)).token;
+        }
+
+        private static string GetResponse(string func, Dictionary<string, string> requestParams,
+            Dictionary<string, string> headers)
+        {
+            var additionalUri = func;
             if (requestParams != null)
             {
                 foreach (var key in requestParams.Keys)
@@ -22,27 +51,39 @@ namespace Server
 
                 additionalUri.Remove(additionalUri.Length - 1);
             }
-            using (var www = UnityWebRequest.Get(ServerUrl+additionalUri))
+
+            using (var www = UnityWebRequest.Get(ServerUrl + additionalUri))
             {
+                if (headers != null)
+                {
+                    foreach (var key in headers.Keys)
+                    {
+                        www.SetRequestHeader(key, headers[key]);
+                    }
+                }
+
                 www.SendWebRequest();
-                while(!www.isDone){}
+                while (!www.isDone)
+                {
+                }
 
                 if (www.isNetworkError || www.isHttpError)
                 {
                     Debug.Log(www.error);
                     throw new Exception(www.error);
                 }
-                
+
 
                 // Show results as text
                 Debug.Log(www.downloadHandler.text);
                 return www.downloadHandler.text;
             }
         }
-        
-        private static IEnumerator PostRequest(string func, Dictionary<string, string> requestParams)
+
+        private static string PostRequest(string func, Dictionary<string, string> requestParams,
+            Dictionary<string, string> headers, bool ignoreErrors=false)
         {
-            var additionalUri = func + "/";
+            var additionalUri = func;
             var form = new WWWForm();
             if (requestParams != null)
             {
@@ -51,40 +92,51 @@ namespace Server
                     form.AddField(key, requestParams[key]);
                 }
             }
-            using (var www = UnityWebRequest.Post(ServerUrl+additionalUri, form ))
-            {
-                yield return www.SendWebRequest();
 
-                if (!www.isNetworkError && !www.isHttpError) yield break;
+            using (var www = UnityWebRequest.Post(ServerUrl + additionalUri, form))
+            {
+                if (headers != null)
+                {
+                    foreach (var key in headers.Keys)
+                    {
+                        www.SetRequestHeader(key, headers[key]);
+                    }
+                }
+
+                www.SendWebRequest();
+                while (!www.isDone){}
+                if ((!www.isNetworkError && !www.isHttpError) || ignoreErrors) return www.downloadHandler.text;
                 Debug.Log(www.error);
                 throw new Exception(www.error);
             }
         }
-        
+
         public IEnumerable<User> GetUsers()
         {
-            var data = GetResponse("user/all", null);
-            return JsonUtility.FromJson<List<User>>(data);
+            var data = GetResponse("/game/players/", null,
+                new Dictionary<string, string>() {{"Authorization", "Token " + _token}});
+            return JsonUtility.FromJson<UserList>(data).Users;
         }
 
-        public IEnumerator UpdateLocation(User user)
+        public void UpdateLocation(User user)
         {
             var requestParams = new Dictionary<string, string>()
             {
-                {"UserId", user.Id.ToString()},
-                {"Location", JsonUtility.ToJson(user.Location)}
+                {"latitude", user.Location.latitude.ToString()},
+                {"longitude", user.Location.longitude.ToString()},
             };
-            yield return PostRequest("user/location", requestParams);
+            PostRequest("/game/geolocation/my/", requestParams,
+                new Dictionary<string, string>() {{"Authorization", "Token " + _token}});
         }
 
-        public bool TryNeutralize(User self, User target)
+        public string TryNeutralize(User target)
         {
             var requestParams = new Dictionary<string, string>()
             {
-                {"UserId", self.Id.ToString()},
-                {"TargetId", target.Id.ToString()}
+                {"id", target.Id.ToString()}
             };
-            return bool.Parse(GetResponse("user/neutralize", requestParams));
+            return PostRequest("/game/kill/", requestParams,
+                new Dictionary<string, string>() {{"Authorization", "Token " + _token}}, ignoreErrors:true);
         }
     }
 }

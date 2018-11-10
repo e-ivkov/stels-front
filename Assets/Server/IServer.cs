@@ -9,7 +9,7 @@ namespace Server
 	public interface IServer
 	{
 		IEnumerable<User> GetUsers();
-		IEnumerator UpdateLocation(User user);
-		bool TryNeutralize(User self, User target);
+		void UpdateLocation(User user);
+		string TryNeutralize(User target);
 	}
 }
