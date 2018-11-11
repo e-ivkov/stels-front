@@ -54,7 +54,7 @@ public class SpawnOnMap : MonoBehaviour {
             RemoveEnemies();
             locations.ForEach(delegate (Vector2d location)
             {
-                var enemyPosition = map.GeoToWorldPosition(LocationProvider.CurrentLocation.LatitudeLongitude);
+                var enemyPosition = map.GeoToWorldPosition(location);
                 var enemy = Instantiate(enemyPrefab);
                 enemy.transform.localPosition = enemyPosition;
                 enemies.Add(enemy);
