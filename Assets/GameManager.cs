@@ -30,6 +30,7 @@ public class GameManager : MonoBehaviour
 			var users = Server.GetUsers();
 			foreach (var user in users)
 			{
+				if(!user.Alive) continue;
 				var icon = Instantiate(TargetIconPrefab, IconParent.transform);
 				icon.GetComponent<TargetIconController>().User = user;
 				icon.GetComponent<TargetIconController>().GameManager = gameObject.GetComponent<GameManager>();
