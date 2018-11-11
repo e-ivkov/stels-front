@@ -45,6 +45,11 @@ public class GameManager : MonoBehaviour
 			yield return new WaitForSeconds(UpdateDelay);
 		}
 	}
+
+	public void TryNeutralize()
+	{
+		Server.TryNeutralize(SelectedIcon.GetComponent<TargetIconController>().User);
+	}
 	
 	// Update is called once per frame
 	void Update () {
