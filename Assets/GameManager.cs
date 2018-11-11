@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Mapbox.Examples;
 using Server;
 using UnityEngine;
@@ -14,8 +15,10 @@ public class GameManager : MonoBehaviour
 	public bool sendPosition = true;
 	public float UpdateDelay;
 	public float PositionSendDelay;
+	[HideInInspector]
 	public GameObject SelectedIcon = null;
 	public GameObject Player;
+	public MessageController MessagePanel;
 
 	// Use this for initialization
 	void Start () {
@@ -39,11 +42,24 @@ public class GameManager : MonoBehaviour
 	{
 		while (updateTargets)
 		{
+			var selectFirst = false;
+			var users = new List<User>(Server.GetUsers());
 			foreach (var icon in GameObject.FindGameObjectsWithTag("targetIcon"))
 			{
-				Destroy(icon);
+				var user = icon.GetComponent<TargetIconController>().User;
+				if (users.Count(u => u.Alive && u.Id == user.Id) > 0)
+				{
+					users.Remove(users.First(u => u.Alive && u.Id == user.Id));
+				}
+				else
+				{
+					if (SelectedIcon == icon)
+					{
+						selectFirst = true;
+					}
+					Destroy(icon);
+				}
 			}
-			var users = Server.GetUsers();
 			foreach (var user in users)
 			{
 				if(!user.Alive) continue;
@@ -53,7 +69,7 @@ public class GameManager : MonoBehaviour
 				var tex = user.Photo;
 				var sprite = Sprite.Create(tex, new Rect(0.0f, 0.0f, tex.width, tex.height), new Vector2(0.5f, 0.5f), 100.0f);
 				icon.GetComponent<Image>().sprite = sprite;
-				if (SelectedIcon == null)
+				if (SelectedIcon == null || selectFirst)
 				{
 					icon.GetComponent<TargetIconController>().Select();
 				}
@@ -64,7 +80,8 @@ public class GameManager : MonoBehaviour
 
 	public void TryNeutralize()
 	{
-		Server.TryNeutralize(SelectedIcon.GetComponent<TargetIconController>().User);
+		var response = Server.TryNeutralize(SelectedIcon.GetComponent<TargetIconController>().User);
+		StartCoroutine(MessagePanel.ShowMessage(response));
 	}
 	
 	// Update is called once per frame

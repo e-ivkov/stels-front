@@ -75,7 +75,7 @@ namespace Server
 
 
                 // Show results as text
-                Debug.Log(www.downloadHandler.text);
+                //Debug.Log(www.downloadHandler.text);
                 return www.downloadHandler.text;
             }
         }
