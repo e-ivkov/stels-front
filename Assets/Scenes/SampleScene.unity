@@ -113,6 +113,48 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &64064915
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 64064916}
+  - component: {fileID: 64064917}
+  m_Layer: 0
+  m_Name: Spawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &64064916
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 64064915}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 79.31029, y: 222.95685, z: 11.3502445}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &64064917
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 64064915}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4c4f9123e7cd0247a9d34650ff8225b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  enemyPrefab: {fileID: 1666111082561998, guid: c295e78d639fc4944891e0407ada36e6,
+    type: 2}
 --- !u!1 &181387938
 GameObject:
   m_ObjectHideFlags: 0
@@ -202,7 +244,7 @@ RectTransform:
   - {fileID: 368744790}
   - {fileID: 1150322220}
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
@@ -221,7 +263,7 @@ GameObject:
   - component: {fileID: 368744792}
   - component: {fileID: 368744791}
   m_Layer: 5
-  m_Name: Button
+  m_Name: KillButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -285,7 +327,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1817499093}
+      - m_Target: {fileID: 0}
         m_MethodName: TryNeutralize
         m_Mode: 1
         m_Arguments:
@@ -2070,7 +2112,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1150322219
 GameObject:
@@ -2120,7 +2162,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67872d3f3c751a74bade58a650e398cf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ShowTime: 15
+  ShowTime: 7
   _text: {fileID: 639181634}
 --- !u!114 &1150322222
 MonoBehaviour:
@@ -2168,6 +2210,7 @@ GameObject:
   - component: {fileID: 1670244205}
   - component: {fileID: 1670244204}
   - component: {fileID: 1670244207}
+  - component: {fileID: 1670244208}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -2254,56 +2297,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   player: {fileID: 662225002}
---- !u!1 &1817499092
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1817499094}
-  - component: {fileID: 1817499093}
-  m_Layer: 0
-  m_Name: GameManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1817499093
+--- !u!114 &1670244208
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1817499092}
+  m_GameObject: {fileID: 1670244202}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 99ea017081d06b046901022552c59038, type: 3}
+  m_Script: {fileID: 11500000, guid: b87e7d91a16c9e54a8967306df76c64d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IconParent: {fileID: 2043893366}
-  TargetIconPrefab: {fileID: 1496580882973932, guid: 344aed2deb33ec34383276b8b766d6b4,
-    type: 2}
-  updateTargets: 1
-  sendPosition: 1
-  UpdateDelay: 10
-  PositionSendDelay: 5
-  SelectedIcon: {fileID: 0}
-  Player: {fileID: 662225002}
-  MessagePanel: {fileID: 1150322221}
---- !u!4 &1817499094
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1817499092}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -53.232803, y: 201.45421, z: 35.455032}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1845757011
 GameObject:
   m_ObjectHideFlags: 0

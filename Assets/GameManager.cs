@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Mapbox.Examples;
+using Mapbox.Utils;
 using Server;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
@@ -13,18 +15,41 @@ public class GameManager : MonoBehaviour
 	public GameObject TargetIconPrefab;
 	public bool updateTargets = true;
 	public bool sendPosition = true;
+	public bool updateEnemyLocation = true;
+	public bool checkAlive = true;
 	public float UpdateDelay;
 	public float PositionSendDelay;
+	public float EnemyLocationDelay;
+	public float AliveCheckDelay;
 	[HideInInspector]
 	public GameObject SelectedIcon = null;
 	public GameObject Player;
+	public GameObject Spawner;
 	public MessageController MessagePanel;
 
 	// Use this for initialization
 	void Start () {
-		Server = new Server.Server("test@innopolis.ru", "123qweasd"); //TODO: remove when login screen is ready
+		DontDestroyOnLoad(gameObject);
+	}
+
+	public void Login(string username, string password)
+	{
+		Server = new Server.Server(username, password);
+		SceneManager.LoadScene("SampleScene");
+	}
+
+	public void StartManager()
+	{
+		IconParent = GameObject.Find("Content");
+		Player = GameObject.Find("PlayerTarget");
+		MessagePanel = GameObject.Find("MessagePanel").GetComponent<MessageController>();
+		Spawner = GameObject.Find("Spawner");
+		var killButton = GameObject.Find("KillButton");
+		killButton.GetComponent<Button>().onClick.AddListener(TryNeutralize);
 		StartCoroutine(UpdateTargetIcons());
 		StartCoroutine(SendMyPosition());
+		StartCoroutine(UpdateEnemiesLocations());
+		StartCoroutine(CheckAlive());
 	}
 
 	IEnumerator SendMyPosition()
@@ -35,6 +60,28 @@ public class GameManager : MonoBehaviour
 				.LatitudeLongitude;
 			Server.UpdateLocation(new Location(){latitude = location.x, longitude = location.y});
 			yield return new WaitForSeconds(PositionSendDelay);
+		}
+	}
+	
+	IEnumerator CheckAlive()
+	{
+		while (checkAlive)
+		{
+			var alive = Server.AmIAlive();
+			if(!alive)
+				StartCoroutine(MessagePanel.ShowMessage("You were neutralized"));
+			yield return new WaitForSeconds(AliveCheckDelay);
+		}
+	}
+
+	private IEnumerator UpdateEnemiesLocations()
+	{
+		while (updateEnemyLocation)
+		{
+			var users = new List<User>(Server.GetUsers());
+			var locations = users.Select(u => new Vector2d(u.Location.latitude, u.Location.longitude));
+			Spawner.GetComponent<SpawnOnMap>().SpawnEnemies(locations.ToList());
+			yield return new WaitForSeconds(EnemyLocationDelay);
 		}
 	}
 

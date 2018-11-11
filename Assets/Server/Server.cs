@@ -111,6 +111,13 @@ namespace Server
             }
         }
 
+        public bool AmIAlive()
+        {
+            var data = GetResponse("/game/amialive/", null,
+                new Dictionary<string, string>() {{"Authorization", "Token " + _token}});
+            return bool.Parse(data);
+        }
+
         public IEnumerable<User> GetUsers()
         {
             var data = GetResponse("/game/players/", null,

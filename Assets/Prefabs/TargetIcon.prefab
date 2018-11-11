@@ -78,6 +78,7 @@ MonoBehaviour:
     Score: 0
     Alive: 0
     Photo_url: 
+  GameManager: {fileID: 0}
 --- !u!114 &114660592741201532
 MonoBehaviour:
   m_ObjectHideFlags: 1

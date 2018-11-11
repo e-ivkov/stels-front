@@ -11,5 +11,6 @@ namespace Server
 		IEnumerable<User> GetUsers();
 		void UpdateLocation(Location myLocation);
 		string TryNeutralize(User target);
+		bool AmIAlive();
 	}
 }
