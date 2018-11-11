@@ -75,7 +75,7 @@ namespace Server
 
 
                 // Show results as text
-                Debug.Log(www.downloadHandler.text);
+                //Debug.Log(www.downloadHandler.text);
                 return www.downloadHandler.text;
             }
         }
@@ -118,12 +118,12 @@ namespace Server
             return JsonUtility.FromJson<UserList>(data).Users;
         }
 
-        public void UpdateLocation(User user)
+        public void UpdateLocation(Location myLocation)
         {
             var requestParams = new Dictionary<string, string>()
             {
-                {"latitude", user.Location.latitude.ToString()},
-                {"longitude", user.Location.longitude.ToString()},
+                {"latitude", myLocation.latitude.ToString()},
+                {"longitude", myLocation.longitude.ToString()},
             };
             PostRequest("/game/geolocation/my/", requestParams,
                 new Dictionary<string, string>() {{"Authorization", "Token " + _token}});
