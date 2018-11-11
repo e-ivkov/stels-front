@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using Mapbox.Examples;
 using Server;
 using UnityEngine;
 using UnityEngine.UI;
@@ -10,16 +11,31 @@ public class GameManager : MonoBehaviour
 	public GameObject IconParent;
 	public GameObject TargetIconPrefab;
 	public bool updateTargets = true;
+	public bool sendPosition = true;
 	public float UpdateDelay;
+	public float PositionSendDelay;
 	public GameObject SelectedIcon = null;
+	public GameObject Player;
 
 	// Use this for initialization
 	void Start () {
 		Server = new Server.Server("test@innopolis.ru", "123qweasd"); //TODO: remove when login screen is ready
 		StartCoroutine(UpdateTargetIcons());
+		StartCoroutine(SendMyPosition());
 	}
 
-	IEnumerator UpdateTargetIcons()
+	IEnumerator SendMyPosition()
+	{
+		while (sendPosition)
+		{
+			var location = Player.GetComponent<ImmediatePositionWithLocationProvider>().LocationProvider.CurrentLocation
+				.LatitudeLongitude;
+			Server.UpdateLocation(new Location(){latitude = location.x, longitude = location.y});
+			yield return new WaitForSeconds(PositionSendDelay);
+		}
+	}
+
+	private IEnumerator UpdateTargetIcons()
 	{
 		while (updateTargets)
 		{
